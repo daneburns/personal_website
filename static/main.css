@@ -1,0 +1,78 @@
+/* Augmented Fourth Typescale */
+p,
+div {
+  font-size: 1.999rem;
+  color: white;
+  font-family: "Cartograph";
+}
+
+.heading {
+  font-size: 7.993rem;
+  font-family: "Cartograph-Bold";
+  color: white;
+  white-space: nowrap;
+}
+
+.body {
+  background-color: black;
+  height: 100vh;
+  width: 100vw;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.container {
+  color: white;
+  display: grid;
+  max-width: 1680px;
+  margin-left: 11.302rem;
+  margin-right: 15.981rem;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.fullWidth {
+  column-span: 3;
+}
+
+.grid-1 {
+  grid-column-start: 1;
+  grid-column-end: 3;
+  grid-row-start: 1;
+  grid-row-end: 1;
+}
+.flex-row {
+  display: flex;
+  height: 8rem;
+}
+.flex-row > p {
+  border-style: solid;
+  border-right-width: 0px;
+  border-left-width: 2px;
+}
+
+.middleNav {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.neonText {
+  color: #fff;
+  text-shadow: 0 0 7px #fff, 0 0 10px #fff, 0 0 21px #fff, 0 0 42px #0fa,
+    0 0 82px #0fa, 0 0 92px #0fa, 0 0 102px #0fa, 0 0 151px #0fa;
+}
+
+.text-white {
+  color: white;
+}
+
+@font-face {
+  font-family: "Cartograph";
+  src: local("Cartograph"), url("CartographCF-Bold.woff2");
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: "Cartograph-Bold";
+  src: local("Cartograph-Bold"), url("CartographCF-ExtraBold.woff2");
+}
