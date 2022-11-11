@@ -8,6 +8,8 @@ import Effect exposing (Effect)
 import Html exposing (Html)
 import Json.Decode
 import Page
+import Layouts.Sidebar
+import Pages.Blog
 import Pages.Home_
 import Pages.Work
 import Pages.NotFound_
@@ -43,7 +45,8 @@ type alias Model =
 
 
 type PageModel
-    = PageModelHome_
+    = PageModelBlog
+    | PageModelHome_
     | PageModelWork
     | PageModelNotFound_
     | Redirecting
@@ -78,6 +81,9 @@ init json url key =
 initPage : { key : Browser.Navigation.Key, url : Url, shared : Shared.Model } -> ( PageModel, Cmd Msg )
 initPage model =
     case Route.Path.fromUrl model.url of
+        Route.Path.Blog ->
+            ( PageModelBlog, Cmd.none )
+
         Route.Path.Home_ ->
             ( PageModelHome_, Cmd.none )
 
@@ -142,7 +148,8 @@ type Msg
 
 
 type PageMsg
-    = Msg_Home_
+    = Msg_Blog
+    | Msg_Home_
     | Msg_Work
     | Msg_NotFound_
 
@@ -216,6 +223,11 @@ update msg model =
 updateFromPage : PageMsg -> Model -> ( PageModel, Cmd Msg )
 updateFromPage msg model =
     case ( msg, model.page ) of
+        ( Msg_Blog, PageModelBlog ) ->
+            ( model.page
+            , Cmd.none
+            )
+
         ( Msg_Home_, PageModelHome_ ) ->
             ( model.page
             , Cmd.none
@@ -243,6 +255,9 @@ subscriptions model =
         subscriptionsFromPage : Sub Msg
         subscriptionsFromPage =
             case model.page of
+                PageModelBlog ->
+                    Sub.none
+
                 PageModelHome_ ->
                     Sub.none
 
@@ -272,11 +287,20 @@ subscriptions model =
 view : Model -> View Msg
 view model =
     case model.page of
+        PageModelBlog ->
+            Layouts.Sidebar.layout
+                { page = (Pages.Blog.page)
+                }
+
         PageModelHome_ ->
-            (Pages.Home_.page)
+            Layouts.Sidebar.layout
+                { page = (Pages.Home_.page)
+                }
 
         PageModelWork ->
-            (Pages.Work.page)
+            Layouts.Sidebar.layout
+                { page = (Pages.Work.page)
+                }
 
         PageModelNotFound_ ->
             Pages.NotFound_.page

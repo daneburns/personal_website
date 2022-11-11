@@ -7,7 +7,8 @@ import Url.Parser exposing ((</>))
 
 
 type Path
-    = Home_
+    = Blog
+    | Home_
     | Work
     | NotFound_
 
@@ -28,6 +29,9 @@ toString path =
     let
         pieces =
             case path of
+                Blog ->
+                    [ "blog" ]
+
                 Home_ ->
                     []
 
@@ -45,6 +49,7 @@ toString path =
 parser : Url.Parser.Parser (Path -> a) a
 parser =
     Url.Parser.oneOf
-        [ Url.Parser.map Home_ Url.Parser.top
+        [ Url.Parser.map Blog (Url.Parser.s "blog")
+        , Url.Parser.map Home_ Url.Parser.top
         , Url.Parser.map Work (Url.Parser.s "work")
         ]

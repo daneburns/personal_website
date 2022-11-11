@@ -1,59 +1,90 @@
-/* Augmented Fourth Typescale */
+/* Augmented Fourth Typescale 
+ *
+ *
+ *
+ *
+ *
+ */
 p,
 div {
+  padding: 0;
   font-size: 1.999rem;
   color: white;
   font-family: "Cartograph";
 }
 
-.heading {
-  font-size: 7.993rem;
-  font-family: "Cartograph-Bold";
+body {
+  background: darkslategray;
+  font-family: "Cartograph", sans-serif;
+  font-weight: 400;
+  line-height: 1.75;
+  padding: 3.998rem;
+}
+
+p {
+  margin-bottom: 1rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  margin: 3rem 0 1.38rem;
+  font-family: "Cartograph", sans-serif;
+  font-weight: 400;
+}
+
+h1 {
+  margin-top: 0;
+  font-size: 5.653rem;
+}
+
+h2 {
+  font-size: 3.998rem;
+}
+
+h3 {
+  font-size: 2.827rem;
+}
+
+h4 {
+  font-size: 1.999rem;
+}
+
+h5 {
+  font-size: 1.414rem;
+}
+
+nav > a {
+  padding: 0 0 0 0;
+  line-height: 0.3;
+  margin: 0 0 0 0;
+}
+
+small,
+.text_small {
+  font-size: 0.707rem;
+}
+
+a {
   color: white;
-  white-space: nowrap;
+  text-decoration: none;
+}
+a:hover {
+  color: #fff;
+  text-shadow: 0 0 7px #fff, 0 0 10px #fff, 0 0 21px #fff, 0 0 42px #0fa,
+    0 0 82px #0fa, 0 0 92px #0fa, 0 0 102px #0fa, 0 0 151px #0fa;
 }
 
-.body {
-  background-color: black;
-  height: 100vh;
-  width: 100vw;
-  position: absolute;
-  left: 0;
-  top: 0;
-}
-
-.container {
-  color: white;
-  display: grid;
-  max-width: 1680px;
-  margin-left: 11.302rem;
-  margin-right: 15.981rem;
-  grid-template-columns: 1fr 1fr 1fr;
-}
-
-.fullWidth {
-  column-span: 3;
-}
-
-.grid-1 {
-  grid-column-start: 1;
-  grid-column-end: 3;
-  grid-row-start: 1;
-  grid-row-end: 1;
-}
 .flex-row {
   display: flex;
   height: 8rem;
 }
-.flex-row > p {
-  border-style: solid;
-  border-right-width: 0px;
-  border-left-width: 2px;
-}
-
-.middleNav {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
+.flex-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .neonText {
@@ -66,13 +97,37 @@ div {
   color: white;
 }
 
+.sidebar {
+  color: white;
+  display: flex;
+  position: fixed;
+  flex-direction: column;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 3fr 1fr;
+  max-height: calc(100vh - 6rem);
+  margin-left: 15.981rem;
+}
+
+.avatar {
+  background-image: url("/dane.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  width: 12rem;
+  height: 12rem;
+}
+
 @font-face {
   font-family: "Cartograph";
-  src: local("Cartograph"), url("CartographCF-Bold.woff2");
+  src: local("Cartograph"), url("/fonts/CartographCF-Bold.woff2");
   font-weight: bold;
 }
 
 @font-face {
   font-family: "Cartograph-Bold";
-  src: local("Cartograph-Bold"), url("CartographCF-ExtraBold.woff2");
+  src: local("Cartograph-Bold"), url("/fonts/CartographCF-ExtraBold.woff2");
 }
