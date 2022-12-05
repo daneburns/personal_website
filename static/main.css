@@ -5,16 +5,8 @@
  *
  *
  */
-p,
-div {
-  padding: 0;
-  font-size: 1.999rem;
-  color: white;
-  font-family: "Cartograph";
-}
-
 body {
-  background: darkslategray;
+  background: #151613;
   font-family: "Cartograph", sans-serif;
   font-weight: 400;
   line-height: 1.75;
@@ -23,6 +15,19 @@ body {
 
 p {
   margin-bottom: 1rem;
+  font-family: "Cartograph", sans-serif;
+  font-weight: 400;
+  font-size: 1.414rem;
+  color: #e1e3dd;
+}
+.thin {
+  font-family: "CartographThin", sans-serif;
+  color: #e1e3dd;
+}
+.border {
+  border: 1px 1px 1px 1px;
+  border-style: solid;
+  padding-left: 1.414rem;
 }
 
 h1,
@@ -62,20 +67,26 @@ nav > a {
   margin: 0 0 0 0;
 }
 
+.italic {
+  font-family: "CartographItalic", sans-serif;
+  color: #e1e3dd;
+}
+
 small,
 .text_small {
   font-size: 0.707rem;
 }
 
 a {
-  color: white;
+  color: #f19143;
   text-decoration: none;
 }
-a:hover {
+/* a:hover {
   color: #fff;
   text-shadow: 0 0 7px #fff, 0 0 10px #fff, 0 0 21px #fff, 0 0 42px #0fa,
     0 0 82px #0fa, 0 0 92px #0fa, 0 0 102px #0fa, 0 0 151px #0fa;
 }
+*/
 
 .flex-row {
   display: flex;
@@ -128,6 +139,16 @@ a:hover {
 }
 
 @font-face {
-  font-family: "Cartograph-Bold";
-  src: local("Cartograph-Bold"), url("/fonts/CartographCF-ExtraBold.woff2");
+  font-family: "CartographBold";
+  src: local("CartographBold"), url("/fonts/CartographCF-ExtraBold.woff2");
+}
+
+@font-face {
+  font-family: "CartographItalic";
+  src: local("CartographItalic"), url("/fonts/CartographCF-RegularItalic.woff2");
+}
+
+@font-face {
+  font-family: "CartographThin";
+  src: local("CartographThin"), url("/fonts/CartographCF-Thin.woff2");
 }
