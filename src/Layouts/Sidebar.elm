@@ -12,6 +12,7 @@ layout { page } =
     , body =
         [ viewSidebar
         , Html.div [ Attr.class "layout" ] page.body
+        , Html.footer [] [ Html.text "dane@telefi.app" ]
         ]
     }
 
