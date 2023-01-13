@@ -10,17 +10,18 @@ layout : { page : View msg } -> View msg
 layout { page } =
     { title = page.title
     , body =
-        [ viewSidebar
-        , Html.div [ Attr.class "layout" ] page.body
-        , Html.footer [] [ Html.text "dane@telefi.app" ]
+        [ Html.div [ Attr.class "layout" ]
+            [ viewSidebar
+            , Html.div [ Attr.class "page" ] page.body
+            ]
         ]
     }
 
 
 viewSidebar : Html msg
 viewSidebar =
-    Html.nav [ Attr.class "sidebar" ]
-        [ Html.a [ Attr.href "/" ] [ Html.h3 [] [ Html.text "Home" ] ]
-        , Html.a [ Attr.href "/work" ] [ Html.h3 [] [ Html.text "Work" ] ]
-        , Html.a [ Attr.href "/blog" ] [ Html.h3 [] [ Html.text "Blog" ] ]
+    Html.nav [ Attr.class "sidebar italic" ]
+        [ Html.h3 [] [ Html.a [ Attr.href "/" ] [ Html.text "Home" ] ]
+        , Html.h3 [] [ Html.a [ Attr.href "/work" ] [ Html.text "Work" ] ]
+        , Html.h3 [] [ Html.a [ Attr.href "/blog" ] [ Html.text "Blog" ] ]
         ]
