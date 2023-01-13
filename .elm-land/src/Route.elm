@@ -1,14 +1,4 @@
-module Route exposing
-    ( Route, fromUrl
-    , href, toString
-    )
-
-{-|
-
-@docs Route, fromUrl
-@docs href, toString
-
--}
+module Route exposing (Route, fromUrl, href, toString)
 
 import Dict exposing (Dict)
 import Html
@@ -16,7 +6,6 @@ import Html.Attributes
 import Route.Path
 import Route.Query
 import Url exposing (Url)
-import Url.Parser exposing ((</>), query)
 
 
 type alias Route params =
@@ -38,26 +27,18 @@ fromUrl params url =
     }
 
 
-href :
-    { path : Route.Path.Path
-    , query : Dict String String
-    , hash : Maybe String
-    }
-    -> Html.Attribute msg
+href : { path : Route.Path.Path, query : Dict String String, hash : Maybe String } -> Html.Attribute msg
 href route =
     Html.Attributes.href (toString route)
 
 
-toString :
-    { route
-        | path : Route.Path.Path
-        , query : Dict String String
-        , hash : Maybe String
-    }
-    -> String
+toString : { route | path : Route.Path.Path, query : Dict String String, hash : Maybe String } -> String
 toString route =
-    String.join ""
+    String.join
+        ""
         [ Route.Path.toString route.path
-        , route.query |> Route.Query.toString |> Maybe.withDefault ""
-        , route.hash |> Maybe.map (String.append "#") |> Maybe.withDefault ""
+        , Route.Query.toString route.query
+        , route.hash
+              |> Maybe.map (String.append "#")
+              |> Maybe.withDefault ""
         ]

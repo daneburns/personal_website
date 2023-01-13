@@ -1,0 +1,170 @@
+/* Augmented Fourth Typescale 
+ *
+ *
+ *
+ *
+ *
+ */
+body {
+  padding: 0;
+  margin: 0;
+  background: #151613;
+  font-family: "Cartograph", sans-serif;
+  font-weight: 400;
+}
+
+p {
+  margin-bottom: 1rem;
+  font-family: "Cartograph", sans-serif;
+  font-weight: 400;
+  font-size: 1.414rem;
+  color: #e1e3dd;
+}
+.thin {
+  font-family: "CartographBold", sans-serif;
+  color: #e1e3dd;
+  margin: 0 0 0 0;
+}
+.border {
+  border: 1px 1px 1px 1px;
+  border-left: 0px;
+  border-style: solid;
+  padding: 1.414rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+h1 {
+  margin: 0 0 0 0;
+  font-size: 5.653rem;
+}
+
+h2 {
+  font-size: 3.998rem;
+}
+
+h3 {
+  font-size: 2.827rem;
+  margin: 0;
+}
+
+h4 {
+  font-size: 1.999rem;
+}
+
+h5 {
+  font-size: 1.414rem;
+}
+
+.italic {
+  font-family: "CartographItalic", sans-serif;
+}
+
+small,
+.text_small {
+  font-size: 0.707rem;
+}
+
+a {
+  color: #e1e3dd;
+  text-decoration: none;
+  margin: 0;
+  font-family: "CartographItalic", sans-serif;
+}
+a:hover {
+  background-size: -4px 1em;
+  box-shadow: inset 0 -0.1em #e1e3dd, inset 0 -0.2em #000;
+  display: inline;
+}
+
+.flex-row {
+  display: flex;
+  height: 8rem;
+}
+.flex-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.neonText {
+  color: #fff;
+  text-shadow: 0 0 7px #fff, 0 0 10px #fff, 0 0 21px #fff, 0 0 42px #0fa,
+    0 0 82px #0fa, 0 0 92px #0fa, 0 0 102px #0fa, 0 0 151px #0fa;
+}
+
+.sidebar {
+  grid-row: span 3;
+  text-align: center;
+  border: solid 2px;
+  border-color: #e1e3dd;
+  background-color: #151613;
+  overflow: visible;
+  color: #e1e3dd;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar > h3 {
+  margin-top: 1.999rem;
+}
+.page {
+  grid-row: span 3;
+  grid-column: span 1;
+}
+
+.bodyText {
+  margin: 1.414rem;
+  overflow: scroll;
+}
+
+.layout {
+  padding: 1rem 1rem 1rem 1rem;
+  display: grid;
+  width: 95vw;
+  height: 95vh;
+  grid-template-columns: 1fr 3fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  grid-template-areas:
+    "sidebar page page"
+    "sidebar page page"
+    "sidebar page page";
+}
+
+.avatar {
+  background-image: url("/dane.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  width: 12rem;
+  height: 12rem;
+}
+
+@font-face {
+  font-family: "Cartograph";
+  src: local("Cartograph"), url("/fonts/CartographCF-Bold.woff2");
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: "CartographBold";
+  src: local("CartographBold"), url("/fonts/CartographCF-Bold.woff2");
+}
+
+@font-face {
+  font-family: "CartographItalic";
+  src: local("CartographItalic"), url("/fonts/CartographCF-RegularItalic.woff2");
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "CartographThin";
+  src: local("CartographThin"), url("/fonts/CartographCF-Thin.woff2");
+}

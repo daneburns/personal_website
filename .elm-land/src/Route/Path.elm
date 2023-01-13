@@ -1,4 +1,4 @@
-module Route.Path exposing (Path(..), fromUrl, toString, href)
+module Route.Path exposing (Path(..), fromString, fromUrl, href, toString)
 
 import Html
 import Html.Attributes
@@ -7,16 +7,42 @@ import Url.Parser exposing ((</>))
 
 
 type Path
-    = Blog
-    | Home_
+    = Home_
+    | Blog
     | Work
     | NotFound_
 
 
 fromUrl : Url -> Path
 fromUrl url =
-    Url.Parser.parse parser url
+    fromString url.path
         |> Maybe.withDefault NotFound_
+
+
+fromString : String -> Maybe Path
+fromString urlPath =
+    let
+        urlPathSegments : List String
+        urlPathSegments =
+            urlPath
+                |> String.split "/"
+                |> List.filter (String.trim >> String.isEmpty >> Basics.not)
+    in
+    case urlPathSegments of
+        [] ->
+            Just Home_
+
+        "blog" :: [] ->
+            Just Blog
+
+        "work" :: [] ->
+            Just Work
+
+        "not-found_" :: [] ->
+            Just NotFound_
+
+        _ ->
+            Nothing
 
 
 href : Path -> Html.Attribute msg
@@ -27,13 +53,14 @@ href path =
 toString : Path -> String
 toString path =
     let
+        pieces : List String
         pieces =
             case path of
-                Blog ->
-                    [ "blog" ]
-
                 Home_ ->
                     []
+
+                Blog ->
+                    [ "blog" ]
 
                 Work ->
                     [ "work" ]
@@ -44,12 +71,3 @@ toString path =
     pieces
         |> String.join "/"
         |> String.append "/"
-
-
-parser : Url.Parser.Parser (Path -> a) a
-parser =
-    Url.Parser.oneOf
-        [ Url.Parser.map Blog (Url.Parser.s "blog")
-        , Url.Parser.map Home_ Url.Parser.top
-        , Url.Parser.map Work (Url.Parser.s "work")
-        ]

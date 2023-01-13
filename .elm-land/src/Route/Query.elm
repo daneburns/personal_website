@@ -3,6 +3,7 @@ module Route.Query exposing (fromUrl, toString)
 import Dict exposing (Dict)
 import Url exposing (Url)
 import Url.Parser exposing (query)
+import Url.Builder exposing (QueryParameter)
 
 
 fromUrl : Url -> Dict String String
@@ -16,49 +17,39 @@ fromUrl url =
                 Dict.empty
 
             else
-                let
-                    decode val =
-                        Url.percentDecode val
-                            |> Maybe.withDefault val
-                in
                 query
                     |> String.split "&"
-                    |> List.filterMap
-                        (String.split "="
-                            >> (\pieces ->
-                                    case pieces of
-                                        [] ->
-                                            Nothing
-
-                                        key :: [] ->
-                                            Just ( decode key, "" )
-
-                                        key :: value :: _ ->
-                                            Just ( decode key, decode value )
-                               )
-                        )
+                    |> List.filterMap (String.split "=" >> queryPiecesToTuple)
                     |> Dict.fromList
 
 
-toString : Dict String String -> Maybe String
+queryPiecesToTuple : List String -> Maybe (String, String)
+queryPiecesToTuple pieces =
+    case pieces of
+        [] ->
+            Nothing
+
+        key :: [] ->
+            Just ( decodeQueryToken key, "" )
+
+        key :: value :: _ ->
+            Just ( decodeQueryToken key, decodeQueryToken value )
+
+
+decodeQueryToken : String -> String
+decodeQueryToken val =
+    Url.percentDecode val
+        |> Maybe.withDefault val
+
+
+toString : Dict String String -> String
 toString queryParameterList =
-    if Dict.isEmpty queryParameterList then
-        Nothing
+    queryParameterList
+        |> Dict.toList
+        |> List.map tupleToQueryPiece
+        |> Url.Builder.toQuery
 
-    else
-        queryParameterList
-            |> Dict.toList
-            |> List.map
-                (\( key, value ) ->
-                    if String.isEmpty value then
-                        Url.percentEncode key
 
-                    else
-                        String.join "="
-                            [ Url.percentEncode key
-                            , Url.percentEncode value
-                            ]
-                )
-            |> String.join "&"
-            |> String.append "?"
-            |> Just
+tupleToQueryPiece : (String, String) -> QueryParameter
+tupleToQueryPiece ( key, value ) =
+    Url.Builder.string key value

@@ -1,13 +1,12 @@
-module Layouts.Sidebar exposing (layout)
+module Components.Sidebar exposing (view)
 
 import Html exposing (Html)
 import Html.Attributes as Attr
-import Page exposing (Page)
 import View exposing (View)
 
 
-layout : { page : View msg } -> View msg
-layout { page } =
+view : { page : View msg } -> View msg
+view { page } =
     { title = page.title
     , body =
         [ Html.div [ Attr.class "layout" ]

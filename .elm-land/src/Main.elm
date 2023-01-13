@@ -7,15 +7,22 @@ import Browser.Navigation
 import Effect exposing (Effect)
 import Html exposing (Html)
 import Json.Decode
+import Layout
+import Layouts
+import Main.Layouts.Model
+import Main.Layouts.Msg
+import Main.Pages.Model
+import Main.Pages.Msg
 import Page
-import Layouts.Sidebar
-import Pages.Blog
 import Pages.Home_
+import Pages.Blog
 import Pages.Work
 import Pages.NotFound_
-import Route
+import Pages.NotFound_
+import Route exposing (Route)
 import Route.Path
 import Shared
+import Task
 import Url exposing (Url)
 import View exposing (View)
 
@@ -25,7 +32,7 @@ main =
     Browser.application
         { init = init
         , update = update
-        , view = View.toBrowserDocument << view
+        , view = view
         , subscriptions = subscriptions
         , onUrlChange = UrlChanged
         , onUrlRequest = UrlRequested
@@ -39,18 +46,10 @@ main =
 type alias Model =
     { key : Browser.Navigation.Key
     , url : Url
-    , page : PageModel
+    , page : Main.Pages.Model.Model
+    , layout : Maybe Main.Layouts.Model.Model
     , shared : Shared.Model
     }
-
-
-type PageModel
-    = PageModelBlog
-    | PageModelHome_
-    | PageModelWork
-    | PageModelNotFound_
-    | Redirecting
-    | Loading (View Never)
 
 
 init : Json.Decode.Value -> Url -> Browser.Navigation.Key -> ( Model, Cmd Msg )
@@ -63,41 +62,58 @@ init json url key =
         ( sharedModel, sharedEffect ) =
             Shared.init flagsResult (Route.fromUrl () url)
 
-        ( pageModel, pageCmd ) =
-            initPage { key = key, url = url, shared = sharedModel }
+        { page, layout } =
+            initPageAndLayout { key = key, url = url, shared = sharedModel, layout = Nothing }
     in
     ( { url = url
       , key = key
-      , page = pageModel
+      , page = Tuple.first page
+      , layout = layout |> Maybe.map Tuple.first
       , shared = sharedModel
       }
     , Cmd.batch
-          [ pageCmd
-          , fromSharedEffect key sharedEffect
+          [ Tuple.second page
+          , layout |> Maybe.map Tuple.second |> Maybe.withDefault Cmd.none
+          , fromSharedEffect { key = key, url = url, shared = sharedModel } sharedEffect
           ]
     )
 
 
-initPage : { key : Browser.Navigation.Key, url : Url, shared : Shared.Model } -> ( PageModel, Cmd Msg )
-initPage model =
+initPageAndLayout : { key : Browser.Navigation.Key, url : Url, shared : Shared.Model, layout : Maybe Main.Layouts.Model.Model } -> { page : ( Main.Pages.Model.Model, Cmd Msg ), layout : Maybe ( Main.Layouts.Model.Model, Cmd Msg ) }
+initPageAndLayout model =
     case Route.Path.fromUrl model.url of
-        Route.Path.Blog ->
-            ( PageModelBlog, Cmd.none )
-
         Route.Path.Home_ ->
-            ( PageModelHome_, Cmd.none )
+            { page = ( Main.Pages.Model.Home_, Cmd.none )
+            , layout = Nothing
+            }
+
+        Route.Path.Blog ->
+            { page = ( Main.Pages.Model.Blog, Cmd.none )
+            , layout = Nothing
+            }
 
         Route.Path.Work ->
-            ( PageModelWork, Cmd.none )
+            { page = ( Main.Pages.Model.Work, Cmd.none )
+            , layout = Nothing
+            }
 
         Route.Path.NotFound_ ->
-            ( PageModelNotFound_
-            , Cmd.none
-            )
+            { page = ( Main.Pages.Model.NotFound_, Cmd.none )
+            , layout = Nothing
+            }
 
 
-runWhenAuthenticated : { model | shared : Shared.Model, url : Url, key : Browser.Navigation.Key } -> (Auth.User -> ( PageModel, Cmd Msg )) -> ( PageModel, Cmd Msg )
+runWhenAuthenticated : { model | shared : Shared.Model, url : Url, key : Browser.Navigation.Key } -> (Auth.User -> ( Main.Pages.Model.Model, Cmd Msg )) -> ( Main.Pages.Model.Model, Cmd Msg )
 runWhenAuthenticated model toTuple =
+    let
+        record =
+            runWhenAuthenticatedWithLayout model (\user -> { page = toTuple user, layout = Nothing })
+    in
+    record.page
+
+
+runWhenAuthenticatedWithLayout : { model | shared : Shared.Model, url : Url, key : Browser.Navigation.Key } -> (Auth.User -> { page : ( Main.Pages.Model.Model, Cmd Msg ), layout : Maybe ( Main.Layouts.Model.Model, Cmd Msg ) }) -> { page : ( Main.Pages.Model.Model, Cmd Msg ), layout : Maybe ( Main.Layouts.Model.Model, Cmd Msg ) }
+runWhenAuthenticatedWithLayout model toRecord =
     let
         authAction : Auth.Action.Action Auth.User
         authAction =
@@ -107,33 +123,48 @@ runWhenAuthenticated model toTuple =
         toCmd =
             Effect.toCmd
                 { key = model.key
+                , url = model.url
+                , shared = model.shared
                 , fromSharedMsg = SharedSent
-                , fromPageMsg = identity
+                , fromCmd = EffectSentCmd
+                , toCmd = Task.succeed >> Task.perform identity
                 }
     in
     case authAction of
         Auth.Action.LoadPageWithUser user ->
-            toTuple user
+            toRecord user
 
         Auth.Action.ShowLoadingPage loadingView ->
-            ( Loading loadingView
-            , Cmd.none
-            )
+            { page = 
+                ( Main.Pages.Model.Loading_ loadingView
+                , Cmd.none
+                )
+            , layout = Nothing
+            }
 
         Auth.Action.ReplaceRoute options ->
-            ( Redirecting
-            , toCmd (Effect.replaceRoute options)
-            )
+            { page = 
+                ( Main.Pages.Model.Redirecting_
+                , toCmd (Effect.replaceRoute options)
+                )
+            , layout = Nothing
+            }
 
         Auth.Action.PushRoute options ->
-            ( Redirecting
-            , toCmd (Effect.pushRoute options)
-            )
+            { page = 
+                ( Main.Pages.Model.Redirecting_
+                , toCmd (Effect.pushRoute options)
+                )
+            , layout = Nothing
+            }
 
         Auth.Action.LoadExternalUrl externalUrl ->
-            ( Redirecting
-            , Browser.Navigation.load externalUrl
-            )
+            { page = 
+                ( Main.Pages.Model.Redirecting_
+                , Browser.Navigation.load externalUrl
+                )
+            , layout = Nothing
+            }
 
 
 
@@ -143,15 +174,10 @@ runWhenAuthenticated model toTuple =
 type Msg
     = UrlRequested Browser.UrlRequest
     | UrlChanged Url
-    | PageSent PageMsg
+    | PageSent Main.Pages.Msg.Msg
+    | LayoutSent Main.Layouts.Msg.Msg
     | SharedSent Shared.Msg
-
-
-type PageMsg
-    = Msg_Blog
-    | Msg_Home_
-    | Msg_Work
-    | Msg_NotFound_
+    | EffectSentCmd (Cmd Msg)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -168,18 +194,29 @@ update msg model =
             )
 
         UrlChanged url ->
-            if url.path == model.url.path then
+            if Route.Path.fromUrl url == Route.Path.fromUrl model.url then
                 ( { model | url = url }
                 , Cmd.none
                 )
 
             else
                 let
+                    { page, layout } =
+                        initPageAndLayout { key = model.key, shared = model.shared, layout = model.layout, url = url }
+
                     ( pageModel, pageCmd ) =
-                        initPage { key = model.key, shared = model.shared, url = url }
+                        page
+
+                    ( layoutModel, layoutCmd ) =
+                        case layout of
+                            Just ( layoutModel_, layoutCmd_ ) ->
+                                ( Just layoutModel_, layoutCmd_ )
+
+                            Nothing ->
+                                ( Nothing, Cmd.none )
                 in
-                ( { model | url = url, page = pageModel }
-                , pageCmd
+                ( { model | url = url, page = pageModel, layout = layoutModel }
+                , Cmd.batch [ pageCmd, layoutCmd ]
                 )
 
         PageSent pageMsg ->
@@ -189,6 +226,15 @@ update msg model =
             in
             ( { model | page = pageModel }
             , pageCmd
+            )
+
+        LayoutSent layoutMsg ->
+            let
+                ( layoutModel, layoutCmd ) =
+                    updateFromLayout layoutMsg model
+            in
+            ( { model | layout = layoutModel }
+            , layoutCmd
             )
 
         SharedSent sharedMsg ->
@@ -204,41 +250,55 @@ update msg model =
             case oldAction /= newAction of
                 True ->
                     let
+                        { layout, page } =
+                            initPageAndLayout { key = model.key, shared = sharedModel, url = model.url, layout = model.layout }
+
                         ( pageModel, pageCmd ) =
-                            initPage { key = model.key, shared = sharedModel, url = model.url }
+                            page
+
+                        ( layoutModel, layoutCmd ) =
+                            ( layout |> Maybe.map Tuple.first
+                            , layout |> Maybe.map Tuple.second |> Maybe.withDefault Cmd.none
+                            )
                     in
-                    ( { model | shared = sharedModel, page = pageModel }
+                    ( { model | shared = sharedModel, page = pageModel, layout = layoutModel }
                     , Cmd.batch
                           [ pageCmd
-                          , fromSharedEffect model.key sharedEffect
+                          , layoutCmd
+                          , fromSharedEffect { model | shared = sharedModel } sharedEffect
                           ]
                     )
 
                 False ->
                     ( { model | shared = sharedModel }
-                    , fromSharedEffect model.key sharedEffect
+                    , fromSharedEffect { model | shared = sharedModel } sharedEffect
                     )
 
+        EffectSentCmd cmd ->
+            ( model
+            , cmd
+            )
 
-updateFromPage : PageMsg -> Model -> ( PageModel, Cmd Msg )
+
+updateFromPage : Main.Pages.Msg.Msg -> Model -> ( Main.Pages.Model.Model, Cmd Msg )
 updateFromPage msg model =
     case ( msg, model.page ) of
-        ( Msg_Blog, PageModelBlog ) ->
+        ( Main.Pages.Msg.Home_, Main.Pages.Model.Home_ ) ->
             ( model.page
             , Cmd.none
             )
 
-        ( Msg_Home_, PageModelHome_ ) ->
+        ( Main.Pages.Msg.Blog, Main.Pages.Model.Blog ) ->
             ( model.page
             , Cmd.none
             )
 
-        ( Msg_Work, PageModelWork ) ->
+        ( Main.Pages.Msg.Work, Main.Pages.Model.Work ) ->
             ( model.page
             , Cmd.none
             )
 
-        ( Msg_NotFound_, PageModelNotFound_ ) ->
+        ( Main.Pages.Msg.NotFound_, Main.Pages.Model.NotFound_ ) ->
             ( model.page
             , Cmd.none
             )
@@ -249,34 +309,95 @@ updateFromPage msg model =
             )
 
 
+updateFromLayout : Main.Layouts.Msg.Msg -> Model -> ( Maybe Main.Layouts.Model.Model, Cmd Msg )
+updateFromLayout msg model =
+    let
+        route : Route ()
+        route =
+            Route.fromUrl () model.url
+    in
+    case ( toLayoutFromPage model, model.layout, msg ) of
+        _ ->
+            ( model.layout
+            , Cmd.none
+            )
+
+
+toLayoutFromPage : Model -> Maybe Layouts.Layout
+toLayoutFromPage model =
+    case model.page of
+        Main.Pages.Model.Home_ ->
+            Nothing
+
+        Main.Pages.Model.Blog ->
+            Nothing
+
+        Main.Pages.Model.Work ->
+            Nothing
+
+        Main.Pages.Model.NotFound_ ->
+            Nothing
+
+        Main.Pages.Model.Redirecting_ ->
+            Nothing
+
+        Main.Pages.Model.Loading_ _ ->
+            Nothing
+
+
+toAuthProtectedPage : Model -> (Auth.User -> Shared.Model -> Route params -> Page.Page model msg) -> Route params -> Maybe (Page.Page model msg)
+toAuthProtectedPage model toPage route =
+    case Auth.onPageLoad model.shared (Route.fromUrl () model.url) of
+        Auth.Action.LoadPageWithUser user ->
+            Just (toPage user model.shared route)
+
+        _ ->
+            Nothing
+
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     let
         subscriptionsFromPage : Sub Msg
         subscriptionsFromPage =
             case model.page of
-                PageModelBlog ->
+                Main.Pages.Model.Home_ ->
                     Sub.none
 
-                PageModelHome_ ->
+                Main.Pages.Model.Blog ->
                     Sub.none
 
-                PageModelWork ->
+                Main.Pages.Model.Work ->
                     Sub.none
 
-                PageModelNotFound_ ->
+                Main.Pages.Model.NotFound_ ->
                     Sub.none
 
-                Redirecting ->
+                Main.Pages.Model.Redirecting_ ->
                     Sub.none
 
-                Loading _ ->
+                Main.Pages.Model.Loading_ _ ->
+                    Sub.none
+
+        maybeLayout : Maybe Layouts.Layout
+        maybeLayout =
+            toLayoutFromPage model
+
+        route : Route ()
+        route =
+            Route.fromUrl () model.url
+
+        subscriptionsFromLayout : Sub Msg
+        subscriptionsFromLayout =
+            case ( maybeLayout, model.layout ) of
+                _ ->
                     Sub.none
     in
     Sub.batch
-        [ Shared.subscriptions (Route.fromUrl () model.url) model.shared
+        [ Shared.subscriptions route model.shared
               |> Sub.map SharedSent
         , subscriptionsFromPage
+        , subscriptionsFromLayout
         ]
 
 
@@ -284,31 +405,44 @@ subscriptions model =
 -- VIEW
 
 
-view : Model -> View Msg
+view : Model -> Browser.Document Msg
 view model =
+    let
+        view_ : View Msg
+        view_ =
+            toView model
+    in
+    View.toBrowserDocument
+        { shared = model.shared
+        , route = Route.fromUrl () model.url
+        , view = view_
+        }
+
+
+toView : Model -> View Msg
+toView model =
+    viewPage model
+
+
+viewPage : Model -> View Msg
+viewPage model =
     case model.page of
-        PageModelBlog ->
-            Layouts.Sidebar.layout
-                { page = (Pages.Blog.page)
-                }
+        Main.Pages.Model.Home_ ->
+            (Pages.Home_.page)
 
-        PageModelHome_ ->
-            Layouts.Sidebar.layout
-                { page = (Pages.Home_.page)
-                }
+        Main.Pages.Model.Blog ->
+            (Pages.Blog.page)
 
-        PageModelWork ->
-            Layouts.Sidebar.layout
-                { page = (Pages.Work.page)
-                }
+        Main.Pages.Model.Work ->
+            (Pages.Work.page)
 
-        PageModelNotFound_ ->
-            Pages.NotFound_.page
+        Main.Pages.Model.NotFound_ ->
+            (Pages.NotFound_.page)
 
-        Redirecting ->
+        Main.Pages.Model.Redirecting_ ->
             View.none
 
-        Loading loadingView ->
+        Main.Pages.Model.Loading_ loadingView ->
             View.map never loadingView
 
 
@@ -316,21 +450,40 @@ view model =
 -- INTERNALS
 
 
-fromPageEffect : Browser.Navigation.Key -> Effect PageMsg -> Cmd Msg
-fromPageEffect key effect =
+fromPageEffect : { model | key : Browser.Navigation.Key, url : Url, shared : Shared.Model } -> Effect Main.Pages.Msg.Msg -> Cmd Msg
+fromPageEffect model effect =
     Effect.toCmd
-        { key = key
-        , fromPageMsg = PageSent
+        { key = model.key
+        , url = model.url
+        , shared = model.shared
         , fromSharedMsg = SharedSent
+        , fromCmd = EffectSentCmd
+        , toCmd = Task.succeed >> Task.perform identity
         }
-        effect
+        (Effect.map PageSent effect)
 
 
-fromSharedEffect : Browser.Navigation.Key -> Effect Shared.Msg -> Cmd Msg
-fromSharedEffect key effect =
+fromLayoutEffect : { model | key : Browser.Navigation.Key, url : Url, shared : Shared.Model } -> Effect Main.Layouts.Msg.Msg -> Cmd Msg
+fromLayoutEffect model effect =
     Effect.toCmd
-        { key = key
-        , fromPageMsg = SharedSent
+        { key = model.key
+        , url = model.url
+        , shared = model.shared
         , fromSharedMsg = SharedSent
+        , fromCmd = EffectSentCmd
+        , toCmd = Task.succeed >> Task.perform identity
         }
-        effect
+        (Effect.map LayoutSent effect)
+
+
+fromSharedEffect : { model | key : Browser.Navigation.Key, url : Url, shared : Shared.Model } -> Effect Shared.Msg -> Cmd Msg
+fromSharedEffect model effect =
+    Effect.toCmd
+        { key = model.key
+        , url = model.url
+        , shared = model.shared
+        , fromSharedMsg = SharedSent
+        , fromCmd = EffectSentCmd
+        , toCmd = Task.succeed >> Task.perform identity
+        }
+        (Effect.map SharedSent effect)
