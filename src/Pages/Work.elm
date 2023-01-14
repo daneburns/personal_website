@@ -6,7 +6,7 @@ import Html.Attributes as Attr
 import View exposing (View)
 
 
-heading  =
+heading =
     div [] [ h2 [ Attr.class "thin border heading" ] [ text "Github Stuff" ] ]
 
 
@@ -15,6 +15,6 @@ page =
     Components.Sidebar.view
         { page =
             { title = "Work"
-            , body = [ heading ]
+            , body = []
             }
         }

@@ -5,12 +5,18 @@
  *
  *
  */
+
+html,
 body {
-  padding: 0;
+  height: 100%;
+  overflow: hidden;
   margin: 0;
+}
+body {
   background: #151613;
   font-family: "Cartograph", sans-serif;
   font-weight: 400;
+  overflow: hidden;
 }
 
 p {
@@ -26,12 +32,6 @@ p {
   margin: 0 0 0 0;
   grid-row: span 1;
   grid-column: span 2;
-}
-.border {
-  border: 1px 1px 1px 1px;
-  border-left: 0px;
-  border-style: solid;
-  padding: 1.414rem;
 }
 
 h1,
@@ -50,6 +50,7 @@ h1 {
 
 h2 {
   font-size: 3.998rem;
+  margin: 0;
 }
 
 h3 {
@@ -109,10 +110,7 @@ a:hover {
 }
 
 .sidebar {
-  padding-top: 0.62rem;
   grid-column: span 1;
-  grid-column-start: 1;
-  grid-row-start: 1;
   grid-row: span 3;
   text-align: center;
   border: solid 2px;
@@ -120,20 +118,18 @@ a:hover {
   background-color: #151613;
   overflow: visible;
   color: #e1e3dd;
+  font-size: 1.999rem;
   display: flex;
   flex-direction: column;
 }
 
 .page {
-  max-height: 95vh;
   overflow: hidden;
   grid-row: span 3;
 }
 
 .bodyText {
   max-height: 100%;
-  margin-left: 1.414rem;
-  padding-right: 1.414rem;
   overflow: auto;
   scrollbar-color: #e1e3dd rgba(225, 227, 221, 0.6);
 }
@@ -142,7 +138,6 @@ a:hover {
   width: 0.707rem;
   background: rgba(225, 227, 221, 0.6);
 }
-
 .bodyText::-webkit-scrollbar-track {
   box-shadow: 4px 4px 0px rgba(255, 255, 0, 1);
 }
@@ -160,29 +155,105 @@ a:hover {
 }
 
 .layout {
-  overflow: hidden;
-  padding: 1rem 1rem 1rem 1rem;
   display: grid;
-  width: 95vw;
-  height: 95vh;
   grid-template-columns: 1fr 3fr;
-  grid-template-rows: 1fr 1fr 1fr;
+  grid-template-rows: 0.5fr 3fr 0.25fr;
+  margin: 0 auto;
+  margin-top: 0.25rem;
+  height: 98%;
+  max-width: 98%;
   grid-template-areas:
     "sidebar heading heading"
     "sidebar page page"
     "sidebar page page";
 }
+
+.navItem {
+  font-size: 2.728rem;
+  margin-left: 5rem;
+  margin-right: 5rem;
+}
+
 .heading {
   grid-column: span 2;
   grid-row: span 1;
+  border-left: 0px;
+  border-left-style: solid;
+  padding: 0rem;
+  text-align: center;
+  height: 100%;
+  border: 0px 1px 1px 1px;
+  border-style: solid;
+  border-color: #e1e3dd;
+  color: #e1e3dd;
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  justify-content: center;
 }
-.avatar {
-  background-image: url("/dane.png");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
-  width: 12rem;
-  height: 12rem;
+
+@media only screen and (max-width: 680px) {
+  body {
+    overscroll-behavior: contain contain;
+  }
+  .navItem {
+    font-size: 1.4rem;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .layout {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 0.5fr 3fr 0.25fr;
+    grid-template-areas:
+      "heading heading heading "
+      "page page page"
+      "nav nav nav";
+  }
+
+  .heading {
+    border-left: 3px;
+    border-left: solid;
+    grid-column: span 3;
+    grid-row: span 1;
+    grid-row-start: 1;
+  }
+
+  h2 {
+    margin-top: 0.4rem;
+    margin-bottom: auto;
+  }
+  .sidebar {
+    display: flex;
+    grid-column: span 3;
+    grid-row-start: 3;
+    flex-direction: row;
+    justify-content: space-around;
+    align-content: center;
+    font-size: 1.25rem;
+  }
+
+  .page {
+    grid-row-start: 2;
+    grid-column: span 3;
+  }
+
+  .navbar {
+    display: flex;
+    font-size: 1.4rem;
+    max-height: 5vh;
+    justify-content: space-between;
+  }
+
+  .initials {
+    display: none;
+  }
+  .space-y-lg > * + * {
+    margin-top: 0rem;
+  }
+  .navItem {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
 }
 
 @font-face {
@@ -199,7 +270,6 @@ a:hover {
 @font-face {
   font-family: "CartographItalic";
   src: local("CartographItalic"), url("/fonts/CartographCF-RegularItalic.woff2");
-  font-style: italic;
 }
 
 @font-face {

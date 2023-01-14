@@ -13,8 +13,7 @@ page =
             { title = "Home"
             , body =
                 [ div []
-                    [ h2 [ class "thin border heading" ] [ text "Dane Burns" ]
-                    , p [ class "bodyText" ]
+                    [ p [ class "bodyText" ]
                         [ text "I am a software engineer and businessy person who is currently the CTO of "
                         , a [ href "https://telefi.app" ] [ text "telefi" ]
                         , text "."
