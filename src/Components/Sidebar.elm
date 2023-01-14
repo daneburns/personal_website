@@ -10,17 +10,50 @@ view { page } =
     { title = page.title
     , body =
         [ Html.div [ Attr.class "layout" ]
-            [ viewSidebar
+            [ viewSidebar page.title
             , Html.div [ Attr.class "page" ] page.body
             ]
         ]
     }
 
 
-viewSidebar : Html msg
-viewSidebar =
+viewSidebar : String -> Html msg
+viewSidebar title =
     Html.nav [ Attr.class "sidebar italic" ]
-        [ Html.h3 [] [ Html.a [ Attr.href "/" ] [ Html.text "Home" ] ]
-        , Html.h3 [] [ Html.a [ Attr.href "/work" ] [ Html.text "Work" ] ]
-        , Html.h3 [] [ Html.a [ Attr.href "/blog" ] [ Html.text "Blog" ] ]
+        [ Html.div [Attr.class "mb-lg"] [ Html.text "Dane Burns" ]
+        , Html.div [ Attr.class "space-y-lg" ]
+            [ Html.h3 []
+                [ Html.a
+                    [ Attr.href "/"
+                    , if title == "Home" then
+                        Attr.class "active"
+
+                      else
+                        Attr.class ""
+                    ]
+                    [ Html.text "Home" ]
+                ]
+            , Html.h3 []
+                [ Html.a
+                    [ Attr.href "/work"
+                    , if title == "Work" then
+                        Attr.class "active"
+
+                      else
+                        Attr.class ""
+                    ]
+                    [ Html.text "Work" ]
+                ]
+            , Html.h3 []
+                [ Html.a
+                    [ Attr.href "/blog"
+                    , if title == "Blog" then
+                        Attr.class "active"
+
+                      else
+                        Attr.class ""
+                    ]
+                    [ Html.text "Blog" ]
+                ]
+            ]
         ]
